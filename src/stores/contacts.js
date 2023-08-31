@@ -9,6 +9,7 @@ const request = axios.create({
 
 export const useContactsStore = defineStore('contacts', () => {
   const contacts = ref([])
+
   async function loadContact() {
     try {
       const { data } = await request.get('contactdb.json')
@@ -21,8 +22,9 @@ export const useContactsStore = defineStore('contacts', () => {
   async function addContact(name, phone) {
     try {
       const id = Date.now().toString()
+      const avatar = null
       contacts.value.push({ id, name, phone })
-      const { data } = await request.post('contactdb.json', { name, phone })
+      const { data } = await request.post('contactdb.json', { name, phone, avatar })
       contacts.value = contacts.value.map((item) => {
         if (item.id === id) return { id: data.name, name, phone }
         return item
@@ -40,5 +42,30 @@ export const useContactsStore = defineStore('contacts', () => {
     }
   }
 
-  return { contacts, addContact, removeContact, loadContact }
+  async function updateContact(id, name, phone, avatar) {
+    try {
+      await request.put(`contactdb/${id}.json`, { name, phone, avatar })
+      contacts.value = contacts.value.map((item) => {
+        if (item.id === id) {
+          item.name = name
+          item.phone = phone
+        }
+        return item
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  async function updateAvatar(id, avatar, name, phone) {
+    const formData = new FormData()
+    formData.append('avatar', avatar)
+    try {
+      await request.put(`contactdb/${id}.json`, { avatar, name, phone })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  return { contacts, addContact, removeContact, loadContact, updateContact, updateAvatar }
 })
