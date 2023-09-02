@@ -11,8 +11,13 @@ const props = defineProps({
   currentSort: String
 })
 
+const ITEMS_PER_PAGE = 10
+const currentPage = ref(1)
+const currentItems = ref([])
+
 const store = useContactsStore()
 const contacts = ref([])
+const currentSort = ref(props.currentSort)
 
 onMounted(async () => {
   await store.loadContact()
@@ -21,12 +26,6 @@ onMounted(async () => {
   // Perform initial sorting
   sortContacts()
 })
-
-const ITEMS_PER_PAGE = 10
-const currentPage = ref(1)
-const currentItems = ref([])
-
-const currentSort = ref(props.currentSort)
 
 // Watch for changes in currentPage and currentSort, and update currentItems accordingly
 watch([currentPage, () => props.currentSort], () => {
@@ -37,7 +36,6 @@ watch([currentPage, () => props.currentSort], () => {
 const handleScroll = () => {
   const { scrollTop, clientHeight, scrollHeight } = document.documentElement
   if (scrollTop + clientHeight >= scrollHeight) {
-    // User has reached the bottom of the page, load more data
     currentPage.value++
   }
 }
@@ -54,7 +52,19 @@ const sortContacts = () => {
   const startIndex = (currentPage.value - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
   const sortedContacts = [...contacts.value].sort(props.sortTypes[props.currentSort].fn)
-  currentItems.value = sortedContacts.slice(startIndex, endIndex)
+
+  if (currentSort.value !== props.currentSort) {
+    // If sorting changes, reset to page 1 and clear currentItems
+    currentPage.value = 1
+    currentSort.value = props.currentSort
+    currentItems.value = []
+  } else if (currentPage.value === 1) {
+    // Clear currentItems when sorting is the same but on page 1
+    currentItems.value = []
+  }
+
+  // Append the sorted data to the currentItems array without clearing previous data
+  currentItems.value.push(...sortedContacts.slice(startIndex, endIndex))
 }
 </script>
 
