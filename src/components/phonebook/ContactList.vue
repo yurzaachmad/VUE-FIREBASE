@@ -49,7 +49,7 @@ const handleScroll = () => {
     currentPage.value++
     setTimeout(() => {
       isLoading.value = false
-    }, 1000) // Add a delay to avoid loading more data too quickly
+    }, 1000)
   }
 }
 
@@ -59,7 +59,6 @@ onMounted(async () => {
   window.addEventListener('scroll', handleScroll)
 })
 
-// Remove the scroll event listener when the component unmounts
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
