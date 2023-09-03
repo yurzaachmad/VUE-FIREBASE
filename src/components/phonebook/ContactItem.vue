@@ -1,7 +1,7 @@
 <script setup>
 import { useContactsStore } from '@/stores/contacts'
 import axios from 'axios'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 const { name, phone, id, avatar } = defineProps({
   name: {
     type: String,
@@ -14,8 +14,14 @@ const { name, phone, id, avatar } = defineProps({
   id: {
     type: String,
     required: true
+  },
+  avatar: {
+    type: Object,
+    required: true
   }
 })
+
+const profilePicture = ref(avatar.avatar)
 
 const store = useContactsStore()
 
@@ -37,8 +43,23 @@ const handleAvatarChange = async (event) => {
       }
     })
     updateAvatar(id, response.data, name, phone)
+    profilePicture.value = response.data
   } catch (error) {
     console.error('Upload error', error)
+  }
+}
+const getAvatarSrc = computed(() => {
+  if (profilePicture.value === undefined) {
+    return '/images/bussines-man.png'
+  } else {
+    return profilePicture.value instanceof File
+      ? URL.createObjectURL(profilePicture.value)
+      : '/images/' + profilePicture.value
+  }
+})
+function DeleteUser(id) {
+  if (confirm('Do you really want to delete?')) {
+    removeContact(id)
   }
 }
 </script>
@@ -46,7 +67,7 @@ const handleAvatarChange = async (event) => {
 <template>
   <div className="container">
     <div @click="openAvatarInput">
-      <img src="/images/bussines-man.png" alt="avatar" className="avatar" />
+      <img :src="getAvatarSrc" alt="avatar" className="avatar" />
 
       <input
         hidden
@@ -72,7 +93,7 @@ const handleAvatarChange = async (event) => {
         <font-awesome-icon
           class="icon"
           :icon="['fas', 'fa-floppy-disk']"
-          @click="(isEdit = !isEdit), updateContact(id, name, phone, avatar)"
+          @click="(isEdit = !isEdit), updateContact(id, name, phone, avatar.avatar)"
         />
       </div>
       <div v-else>
@@ -83,7 +104,7 @@ const handleAvatarChange = async (event) => {
         />
         <font-awesome-icon
           class="icon"
-          @click="removeContact(id)"
+          v-on:click="DeleteUser(id)"
           :icon="['fas', 'fa-trash-can']"
         />
       </div>

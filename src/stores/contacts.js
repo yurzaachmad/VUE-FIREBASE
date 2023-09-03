@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import router from '@/router'
 
 const request = axios.create({
   baseURL: 'https://phonebookapi-34346-default-rtdb.firebaseio.com/',
@@ -29,6 +30,7 @@ export const useContactsStore = defineStore('contacts', () => {
         if (item.id === id) return { id: data.name, name, phone }
         return item
       })
+      router.push({ path: '/' })
     } catch (e) {
       console.log(e)
     }
@@ -36,7 +38,10 @@ export const useContactsStore = defineStore('contacts', () => {
   async function removeContact(id) {
     try {
       await request.delete(`contactdb/${id}.json`)
-      contacts.value = contacts.value.filter((item) => item.id !== id)
+      contacts.value = contacts.value.filter((item) => {
+        item.id !== id
+      })
+      router.go(0)
     } catch (e) {
       console.log(e)
     }
@@ -62,6 +67,13 @@ export const useContactsStore = defineStore('contacts', () => {
     formData.append('avatar', avatar)
     try {
       await request.put(`contactdb/${id}.json`, { avatar, name, phone })
+      contacts.value = contacts.value.map((item) => {
+        if (item.id === id) {
+          item.avatar = avatar
+          console.log(item.avatar)
+        }
+        return item
+      })
     } catch (e) {
       console.log(e)
     }

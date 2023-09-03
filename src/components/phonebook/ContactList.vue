@@ -72,6 +72,7 @@ onUnmounted(() => {
       :phone="contact.phone"
       :key="contact.id"
       :id="contact.id"
+      :avatar="contact"
     />
     <div style="height: 600px"></div>
   </div>
