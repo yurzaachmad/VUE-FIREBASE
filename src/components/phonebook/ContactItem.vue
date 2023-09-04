@@ -57,11 +57,6 @@ const getAvatarSrc = computed(() => {
       : '/images/' + profilePicture.value
   }
 })
-function DeleteUser(id) {
-  if (confirm('Do you really want to delete?')) {
-    removeContact(id)
-  }
-}
 </script>
 
 <template>
@@ -104,17 +99,70 @@ function DeleteUser(id) {
         />
         <font-awesome-icon
           class="icon"
-          v-on:click="DeleteUser(id)"
+          @click="confirmRemoveContact"
           :icon="['fas', 'fa-trash-can']"
         />
+      </div>
+      <div v-if="showConfirmDialog" class="confirm-dialog">
+        <p>Are you sure you want to remove this contact?</p>
+        <button @click="removeContact(id)">Yes</button>
+        <button @click="cancelRemoveContact">No</button>
       </div>
     </div>
   </div>
 </template>
 
+<script>
+export default {
+  data() {
+    return {
+      showConfirmDialog: false
+    }
+  },
+  methods: {
+    confirmRemoveContact() {
+      this.showConfirmDialog = true
+    },
+    removeContact(id) {
+      removeContact(id)
+      this.showConfirmDialog = false
+    },
+    cancelRemoveContact() {
+      this.showConfirmDialog = false
+    }
+  }
+}
+</script>
+
 <style scoped>
-.name {
-  color: 500;
-  font-size: 2.6rem;
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+.confirm-dialog p {
+  margin-bottom: 20px;
+}
+
+.confirm-dialog button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirm-dialog button:hover {
+  background-color: #0056b3;
 }
 </style>
